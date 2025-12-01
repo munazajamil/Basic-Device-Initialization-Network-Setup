@@ -6,140 +6,163 @@ You will configure routers, switches, PCs, static routing, VLAN management, and 
 🌐 Network Topology
 [PC1] ---- [Switch1] ---- [Router1] ---- [Router2] ---- [Switch2] ---- [PC2]
 
+- All are connected using **Copper Straight-Through** cable.
+- Few ports were down so do basic configuration using CLI mode of both routers using these basic commands and check router interface, if it is up or not;
 
-All connections use Copper Straight-Through cable.
+  
+## **PHASE : 1 - Configure Routers**
 
-Both routers and switches are configured entirely through CLI.
+- Router1
 
-🔧 PHASE 1 — Configure Routers
-Router 1
-enable
-config t
-int g0/0/0
- no shut
-int g0/0/1
- no shut
-exit
-exit
+  ***>enable***
 
-Router 2
-enable
-config t
-int g0/0/1
- no shut
-int g0/0/0
- no shut
-exit
-exit
+  ***>config t***
 
-🔧 PHASE 2 — Configure Switches
-Switch 1
-enable
-config t
-hostname Switch1
-enable secret class123
+  ***>int gigabitethernet0/0/0***
 
-line console 0
- password cisco123
- login
-exit
+  ***>no shut***
 
-line vty 0 15
- password cisco123
- login
-exit
+  ***>Interface GigabitEthernet0/0/1***
 
-interface vlan 1
- ip address 192.168.1.10 255.255.255.0
- no shut
-exit
+  ***>no shut***
 
-ip default-gateway 192.168.1.1
-exit
+  ***>exit
+ >exit***
 
-Switch 2
+- Router 2
 
-(Only IP changes)
+***>enable***
 
-interface vlan 1
- ip address 192.168.2.10 255.255.255.0
- no shut
-exit
+  ***>config t***
 
-ip default-gateway 192.168.2.1
-exit
+  ***>int gigabitethernet0/0/1***
 
-💻 PHASE 3 — Configure PC IP Addresses
-PC1
+  ***>no shut***
 
-IP: 192.168.1.2
+  ***>Interface GigabitEthernet0/0/0***
 
-Mask: 255.255.255.0
+  ***>no shut***
 
-Gateway: 192.168.1.1
+  ***>exit
+ >exit***
 
-PC2
+## **PHASE : 2 - Configure Switches**
 
-IP: 192.168.2.3
+- Now lets do Initial device configuration:
+- Switch 1 & Switch 2
 
-Mask: 255.255.255.0
+***>enable
+>config t
+>hostname Switch1 (to set hostname)
+>enable secret class123 (to set privileged exec password)
+>line console 0 (to set console password)
+>password cisco123
+>login
+>exit
+>line vty 0 15 (set vty for remote access)
+>password cisco123
+>login
+>exit***
 
-Gateway: 192.168.2.1
+  ***>interface vlan 1 (to configure management interface)
+    >ip address 192.168.1.10 255.255.255.0
+    >no shut
+ >exit
+ >ip default-gateway 192.168.1.1 (set default gateway)
+>exit***
 
-🛣️ Static Routing
-Router 1
-config t
-ip route 192.168.2.0 255.255.255.0 192.168.10.2
-exit
+- Switch 2( just change IP other remain same as S1)
 
-Router 2
-config t
-ip route 192.168.1.0 255.255.255.0 192.168.10.1
-exit
+***>interface vlan 1
+    >ip address 192.168.2.10 255.255.255.0
+    >no shut
+ >exit
+ >ip default-gateway 192.168.2.1
+>exit***
 
-🔍 Verification Commands
-PC1
-ping 192.168.1.10
-ping 192.168.1.1
-ping 192.168.10.2
-ping 192.168.2.3
+---
 
-Router 1
-ping 192.168.2.3
-show ip route
-show interfaces description
+## **PHASE : 3 - Configure IP Addresses**
 
-Switch 1
-show mac address-table
-show vlan brief
-show interfaces vlan 1
-show ip interface brief
+- PC 1
 
-🐞 Troubleshooting Example
+**IP Address:** 192.168.1.2
 
-Shutdown interface to break connectivity:
+**Subnet Mask:** 255.255.255.0
 
-config t
-interface g0/0/1
- shutdown
+**Default Gateway:** 192.168.1.1
 
+- PC 2
 
-Bring it back:
+**IP Address:** 192.168.1.3
 
-no shut
+**Subnet Mask:** 255.255.255.0
 
-✔️ Lab Completion Checklist
+**Default Gateway:** 192.168.2.1
 
- Console access into all devices
+Now all devices are configured sucessfully and what i see;
 
- Switch basic configuration completed
+- **Switch1 prompt:** `Switch1#`
+- **Switch2 prompt:** `Switch2#`
+- **Router1 prompt:** `Router1#`
+- **Router2 prompt:** `Router2#`
 
- Router interfaces configured
+Now to Verify Switch Configuration:
 
- Static routing implemented
+```
+***Switch1# show interfaces vlan 1
+Switch1# show ip interface brief***
+```
 
- PC IP addresses assigned
+- To configure Static Routing on routers:
 
- End-to-end ping successful
+***Router1# configure terminal
+Router1(config)# ip route 192.168.2.0 255.255.255.0 192.168.10.2
+Router1(config)# exit***
 
- Troubleshooting practiced
+***Router2# configure terminal
+Router2(config)# ip route 192.168.1.0 255.255.255.0 192.168.10.1
+Router2(config)# exit***
+
+- For Basic Connectivity Test i do;
+
+# From PC1 command prompt
+
+PC1> ping 192.168.1.10    (Switch1)
+PC1> ping 192.168.1.1      (Router1)
+PC1> ping 192.168.10.2    (Router2)
+PC1> ping 192.168.2.100   (PC2)
+
+# From Router1
+
+Router1# ping 192.168.2.100
+Router1# show ip route
+Router1# show interfaces description
+
+# From Switch1
+
+Switch1# show mac address-table
+Switch1# show vlan brief
+
+- **Troubleshooting:**
+
+I do shutdown interface and then test it for troubleshooting practice;
+
+***Router1# config t
+Router1(config)# interface gigabitethernet 0/0/1
+Router1(config-if)# shutdown***
+
+I do test connectivity between PC1 & PC2, so then i bring interface up by using no shut command.
+
+This comprehensive lab gives me hands-on practice with all fundamental Cisco networking concepts
+
+## **Lab Completion Checklist**
+
+- Successfully console into all devices
+- Configure basic settings on both switches
+- Configure basic settings on both routers
+- Establish physical connections correctly
+- Configure PC IP addresses
+- Set up static routing
+- Verify end-to-end connectivity
+- Practice troubleshooting scenarios
